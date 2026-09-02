@@ -8,3 +8,5 @@ Offline/online εργαλείο για τον Κώδικα Χωροταξίας-
 ΒΑΣΗ Engine (`build_index.py`, `watch_domiki.py`). Μην τα επεξεργάζεσαι χειροκίνητα.
 
 Πηγές: Εθνικό Τυπογραφείο (search.et.gr), core.domiki.gr. Το εργαλείο δεν υποκαθιστά το ΦΕΚ.
+
+© Μάρκος Πορτάλιος — PRTA Architecture Office
