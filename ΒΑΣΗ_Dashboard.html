@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ΒΑΣΗ — Κώδικας Χωροταξίας-Πολεοδομίας Ν.5306/2026</title>
+<style>
+:root{
+  --bg:#f7f6f3; --panel:#ffffff; --ink:#1a1a18; --muted:#6b6b66;
+  --accent:#a8501c; --accent-soft:#f3e3d7; --line:#e4e2dc; --mark:#ffe9a8;
+  --mono:'Consolas','Menlo',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#191917;--panel:#222220;--ink:#e8e6e1;--muted:#96948d;
+        --accent:#e08b4e;--accent-soft:#3a2c20;--line:#3a3935;--mark:#5c4a12;}
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:18px 24px 10px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;font-weight:650}
+header h1 span{color:var(--accent)}
+header .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+nav{display:flex;gap:4px;padding:10px 24px 0;border-bottom:1px solid var(--line);
+    background:var(--bg);position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);border-bottom:none;background:var(--panel);color:var(--muted);
+  padding:8px 16px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px}
+nav button.active{color:var(--ink);font-weight:600;border-color:var(--accent);background:var(--accent-soft)}
+nav button .cnt{background:var(--accent);color:#fff;border-radius:10px;padding:0 7px;font-size:11px;font-weight:700;margin-left:4px}
+main{max-width:1160px;margin:0 auto;padding:20px 24px 60px}
+.tab{display:none}.tab.active{display:block}
+input[type=text],input[type=number],select{
+  font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel);color:var(--ink);outline:none;width:100%}
+input:focus,select:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1;min-width:140px}
+.row .narrow{flex:0 0 160px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.card:hover{border-color:var(--accent)}
+.card h3{margin:0 0 4px;font-size:15px}
+.card h3 .num{color:var(--accent);font-family:var(--mono);margin-right:8px}
+.card .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+.card .snip{font-size:13.5px;color:var(--ink)}
+mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+.stats{font-size:12.5px;color:var(--muted);margin:6px 0 14px}
+/* Article two-column layout */
+#art-outer{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start}
+@media(max-width:900px){#art-outer{grid-template-columns:1fr}}
+#artview{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 26px;min-height:200px}
+#artview h2{margin:0 0 6px;font-size:18px}
+.provblock{background:var(--accent-soft);border-radius:8px;padding:10px 14px;font-size:13px;margin:12px 0}
+.provblock b{color:var(--accent);display:block;margin-bottom:6px}
+.prov-item{padding:3px 0;font-size:12.5px;color:var(--ink);display:flex;align-items:baseline;gap:8px;border-bottom:1px solid rgba(0,0,0,.05)}
+.prov-item:last-child{border-bottom:none}
+.prov-link{color:var(--accent);cursor:pointer;font-size:11.5px;white-space:nowrap;
+           border:1px solid var(--accent);border-radius:4px;padding:0 5px;line-height:1.6;flex-shrink:0}
+.prov-link:hover{background:var(--accent);color:#fff}
+/* Article body */
+#artbody{white-space:pre-wrap;font:14.5px/1.8 'Segoe UI',system-ui,sans-serif;margin:16px 0 0}
+#artbody a.xref{color:var(--accent);text-decoration:none;font-weight:600;
+                border-bottom:1.5px solid var(--accent-soft);cursor:pointer;padding:0 1px}
+#artbody a.xref:hover{background:var(--accent-soft);border-radius:3px}
+#artbody strong{font-weight:700}
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:4px;margin-bottom:12px;font-size:13px;flex-wrap:wrap;min-height:28px}
+.bc-item{color:var(--accent);cursor:pointer;font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:4px;background:var(--accent-soft)}
+.bc-item:hover{opacity:.8}
+.bc-sep{color:var(--muted);margin:0 1px}
+.bc-current{color:var(--ink);font-weight:700;font-family:var(--mono);font-size:13px}
+.bc-back{cursor:pointer;color:var(--muted);font-size:13px;border:1px solid var(--line);border-radius:6px;padding:3px 10px;background:var(--panel);flex:0 0 auto}
+.bc-back:hover{border-color:var(--accent);color:var(--accent)}
+/* Sidebar */
+.sidecard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.sidecard h4{margin:0 0 9px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.sidecard h4 .cnt{background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:0 7px;font-size:11px;font-weight:700;letter-spacing:0}
+.xref-item{display:block;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;color:inherit;text-decoration:none}
+.xref-item:last-child{border-bottom:none}
+.xref-item:hover .xref-num{text-decoration:underline;color:var(--accent)}
+.xref-num{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--accent);margin-right:5px}
+.xref-title{color:var(--muted);font-size:12px;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-more{font-size:12px;color:var(--muted);padding-top:6px;font-style:italic}
+.side-empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 0;font-style:italic}
+/* Mapping + Browse */
+.maprow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.maprow:last-child{border-bottom:none}
+.maprow .arrow{color:var(--accent);font-weight:700}
+.maprow a{color:var(--accent);cursor:pointer;text-decoration:underline}
+.pill{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:20px;padding:1px 10px;font-size:12px;margin:2px 3px 2px 0}
+.empty{color:var(--muted);padding:30px;text-align:center}
+.notice{font-size:12.5px;color:var(--muted);border-left:3px solid var(--accent);padding:4px 10px;margin:10px 0}
+h2.sec{font-size:16px;margin:22px 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.panelbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>ΒΑΣΗ <span>·</span> Κώδικας Χωροταξίας-Πολεοδομίας <span>Ν.5306/2026</span></h1>
+  <div class="sub" id="substats">…</div>
+</header>
+<nav>
+  <button class="active" data-tab="search">🔍 Αναζήτηση</button>
+  <button data-tab="art">📖 Άρθρο</button>
+  <button data-tab="map">🔁 Αντιστοίχιση παλιό↔νέο</button>
+  <button data-tab="browse">🗂️ Πλοήγηση</button>
+  <button data-tab="upd">🆕 Ενημερώσεις <span class="cnt" id="updcnt" style="display:none"></span></button>
+</nav>
+<main>
+
+<section class="tab active" id="tab-search">
+  <div class="row">
+    <input type="text" id="q" placeholder="Αναζήτηση στα 471 άρθρα — π.χ. σοφίτα, συντελεστής δόμησης, εκτός σχεδίου αρτιότητα… (με ή χωρίς τόνους)">
+    <select id="fmeros" class="narrow"><option value="">Όλα τα Μέρη</option></select>
+  </div>
+  <div class="stats" id="searchstats"></div>
+  <div id="results"></div>
+</section>
+
+<section class="tab" id="tab-art">
+  <div class="row">
+    <input type="number" id="artnum" class="narrow" min="1" max="477" placeholder="Αρ. άρθρου (1–477)">
+    <button class="bc-back" id="backbtn" onclick="goBack()" style="display:none">← Πίσω</button>
+    <div style="flex:3"></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div id="art-outer">
+    <div id="artview" class="empty">Δώσε αριθμό άρθρου (1–477).</div>
+    <div id="artsidebar"></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-map">
+  <div class="grid2">
+    <div class="panelbox">
+      <h2 class="sec" style="margin-top:0">Παλιό δίκαιο → Κώδικας</h2>
+      <div class="row">
+        <input type="text" id="mlaw" list="lawlist" placeholder="Νόμος — π.χ. 4067, 4495, π.δ. 1985">
+        <datalist id="lawlist"></datalist>
+        <input type="text" id="mart" class="narrow" placeholder="Άρθρο (π.χ. 11)">
+      </div>
+      <div id="mapout" class="empty">Δώσε νόμο (και προαιρετικά άρθρο).</div>
+    </div>
+    <div class="panelbox">
+      <h2 class="sec" style="margin-top:0">Κώδικας → προέλευση</h2>
+      <div class="row">
+        <input type="number" id="rmapnum" class="narrow" min="1" max="477" placeholder="Άρθρο ΚΧΠ">
+        <div style="flex:2"></div>
+      </div>
+      <div id="rmapout" class="empty">Δώσε αριθμό άρθρου ΚΧΠ.</div>
+    </div>
+  </div>
+  <div class="notice">Η αντιστοίχιση προκύπτει από τα provenance (ΦΕΚ Α΄ 88/8.6.2026). Πάντα επιβεβαίωσε με το πλήρες κείμενο του άρθρου.</div>
+</section>
+
+<section class="tab" id="tab-browse">
+  <div class="row">
+    <select id="bmeros"><option value="">— Διάλεξε Μέρος —</option></select>
+    <select id="btmima"><option value="">Όλα τα Τμήματα</option></select>
+  </div>
+  <div id="browseout"></div>
+</section>
+
+<section class="tab" id="tab-upd">
+  <div class="row">
+    <input type="text" id="uq" placeholder="Φίλτρο στις ενημερώσεις — π.χ. 5306, αυθαίρετα, Ρέθυμνο, ΦΕΚ 88…">
+    <select id="usrc" class="narrow">
+      <option value="new" selected>Νέες καταχωρήσεις</option>
+      <option value="">Όλες οι κατηγορίες</option>
+      <option value="enforce">Έναρξη ισχύος διατάξεων</option>
+      <option value="changes">Αλλαγές κωδικοποίησης</option>
+    </select>
+    <select id="uscope" class="narrow">
+      <option value="">Εθνικά + Κρήτη</option>
+      <option value="national">Μόνο εθνικά</option>
+      <option value="crete">Μόνο Κρήτη</option>
+    </select>
+    <select id="udays" class="narrow">
+      <option value="14">Τελευταίες 2 εβδ.</option>
+      <option value="30">Τελευταίες 30 ημ.</option>
+      <option value="90">Τελευταίες 90 ημ.</option>
+      <option value="0" selected>Όλα</option>
+    </select>
+  </div>
+  <div class="stats" id="updstats"></div>
+  <div id="updout"></div>
+  <div class="notice">Πηγή: ημερολόγιο core.domiki.gr (εβδομαδιαίος αυτόματος έλεγχος) · PDF ΦΕΚ από το Εθνικό Τυπογραφείο.
+    Οι «Αλλαγές κωδικοποίησης» είναι άρθρα παλαιότερων νόμων που το domiki επισημαίνει ως τροποποιημένα — έλεγξε πάντα το ΦΕΚ.</div>
+</section>
+
+</main>
+<script src="vasi_data.js"></script>
+<script src="domiki_updates.js"></script>
+<script>
+"use strict";
+const D = window.VASI_DATA || {articles:[],mapping:[],missing:[]};
+const GD = {"ά":"α","έ":"ε","ή":"η","ί":"ι","ϊ":"ι","ΐ":"ι","ό":"ο","ύ":"υ","ϋ":"υ","ΰ":"υ","ώ":"ω","ς":"σ"};
+const norm = s => (s||"").toLowerCase().replace(/[άέήίϊΐόύϋΰώς]/g, c => GD[c]||c);
+const esc  = s => String(s||"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+D.articles.forEach(a => { a.nb = norm(a.b); a.nt = norm(a.t); });
+const byNum = Object.fromEntries(D.articles.map(a => [a.a, a]));
+
+/* BACKLINKS — precompute at load
+   Regex matches accented Greek as-is in the raw body text.
+   We strip the callout header first to avoid false positives from the
+   "Κωδικοποιεί: ν.4067 Άρθρο 11" provenance line (those are old-law
+   article numbers, not ΚΧΠ numbers). */
+const XREF_RE = /[άα]ρθρ[αάοόωώυύ]\w*\s+(\d+)/g;
+const outgoingRefs = {};
+const backlinks    = {};
+for (const a of D.articles) {
+  // Strip callout + H1 before scanning so provenance line doesn't pollute refs
+  const bodyClean = (a.b||"").replace(/^(> [^\n]*\n)+\n?/,"").replace(/^# [^\n]+\n+/,"");
+  const refs = new Set();
+  XREF_RE.lastIndex = 0;
+  let m;
+  while ((m = XREF_RE.exec(bodyClean)) !== null) {
+    const n = +m[1];
+    if (n !== a.a && byNum[n]) refs.add(n);
+  }
+  outgoingRefs[a.a] = [...refs].sort((x,y)=>x-y);
+  for (const n of refs) {
+    if (!backlinks[n]) backlinks[n] = [];
+    backlinks[n].push(a.a);
+  }
+}
+for (const k of Object.keys(backlinks)) backlinks[k].sort((a,b)=>+a-+b);
+
+document.getElementById("substats").textContent =
+  `${D.articles.length}/477 άρθρα · ${D.mapping.length} αντιστοιχίσεις παλιό⇔νέο · index: ${D.generated}` +
+  (D.missing.length ? ` · λείπουν: ${D.missing.join(", ")}` : "");
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+});
+function goTab(name){ document.querySelector(`nav button[data-tab=${name}]`).click(); }
+
+const merosSet = [...new Set(D.articles.map(a=>a.m).filter(Boolean))];
+for (const sel of ["fmeros","bmeros"]){
+  const el = document.getElementById(sel);
+  merosSet.forEach(m => { const o=document.createElement("option"); o.value=m; o.textContent="Μέρος "+m; el.appendChild(o); });
+}
+
+/* SEARCH */
+const cls = {"α":"[αά]","ε":"[εέ]","η":"[ηή]","ι":"[ιίϊΐ]","ο":"[οό]","υ":"[υύϋΰ]","ω":"[ωώ]","σ":"[σς]"};
+function highlight(text, words){
+  let out = esc(text);
+  for (const w of words){
+    if (!w) continue;
+    const pat = [...w].map(ch => cls[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("");
+    try { out = out.replace(new RegExp("("+pat+")","gi"), "<mark>$1</mark>"); } catch(e){}
+  }
+  return out;
+}
+function snippet(a, words){
+  const pos=words.length?a.nb.indexOf(words[0]):-1;
+  const start=Math.max(0,pos-90), end=Math.min(a.b.length,(pos<0?0:pos)+240);
+  return (start>0?"… ":"")+highlight(a.b.slice(start,end),words)+(end<a.b.length?" …":"");
+}
+function doSearch(){
+  const qraw=document.getElementById("q").value.trim();
+  const fm=document.getElementById("fmeros").value;
+  const out=document.getElementById("results"), st=document.getElementById("searchstats");
+  if (qraw.length<2){out.innerHTML="";st.textContent="";return;}
+  const words=norm(qraw).split(/\s+/).filter(Boolean);
+  const hits=[];
+  for (const a of D.articles){
+    if (fm && a.m!==fm) continue;
+    let score=0, ok=true;
+    for (const w of words){
+      const inTitle=a.nt.includes(w);
+      let c=0, i=-1;
+      while ((i=a.nb.indexOf(w,i+1))!==-1 && c<30) c++;
+      if (!inTitle && c===0){ok=false;break;}
+      score+=(inTitle?12:0)+c;
+    }
+    if (ok) hits.push([score,a]);
+  }
+  hits.sort((x,y)=>y[0]-x[0]);
+  st.textContent=`${hits.length} άρθρα`;
+  out.innerHTML=hits.slice(0,50).map(([s,a])=>`
+    <div class="card" onclick="showArt(${a.a})">
+      <h3><span class="num">ΚΧΠ ${a.a}</span>${esc(a.t.replace(/^Άρθρο \d+\s*—\s*/,""))}</h3>
+      <div class="meta">Μέρος ${esc(a.m||"—")} · ${esc(a.tm||"")}${a.p?` · κωδικοποιεί: ${esc(a.p.slice(0,90))}${a.p.length>90?"…":""}`:""}</div>
+      <div class="snip">${snippet(a,words)}</div>
+    </div>`).join("")||`<div class="empty">Κανένα αποτέλεσμα.</div>`;
+}
+document.getElementById("q").addEventListener("input", doSearch);
+document.getElementById("fmeros").addEventListener("change", doSearch);
+
+/* ARTICLE VIEW — navigation stack */
+const navStack = [];
+let currentArtNum = null;
+
+function showArt(n){
+  n = +n;
+  if (currentArtNum !== null && currentArtNum !== n) navStack.push(currentArtNum);
+  currentArtNum = n;
+  goTab("art");
+  document.getElementById("artnum").value = n;
+  _renderAll(n);
+}
+function goBack(){
+  if (!navStack.length) return;
+  currentArtNum = navStack.pop();
+  document.getElementById("artnum").value = currentArtNum;
+  _renderAll(currentArtNum);
+}
+function jumpTo(n){
+  n = +n;
+  const idx = navStack.lastIndexOf(n);
+  if (idx !== -1) navStack.splice(idx);
+  navStack.push(currentArtNum);
+  currentArtNum = n;
+  document.getElementById("artnum").value = n;
+  _renderAll(n);
+}
+function _renderAll(n){
+  renderArt(n);
+  renderSidebar(n);
+  renderBreadcrumb();
+  const el = document.getElementById("artview");
+  if (el) el.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function renderBreadcrumb(){
+  const bc=document.getElementById("breadcrumb");
+  const btn=document.getElementById("backbtn");
+  if (!navStack.length){bc.innerHTML="";btn.style.display="none";return;}
+  btn.style.display="";
+  const show=navStack.slice(-5);
+  bc.innerHTML=(navStack.length>5?'<span style="color:var(--muted);font-size:12px">… </span>':"")+
+    show.map(n=>{
+      const t=(byNum[n]||{t:""}).t.replace(/^Άρθρο \d+\s*—\s*/,"").slice(0,35);
+      return `<span class="bc-item" onclick="jumpTo(${n})" title="ΚΧΠ ${n} — ${esc(t)}">ΚΧΠ ${n}</span><span class="bc-sep">›</span>`;
+    }).join("")+`<span class="bc-current">ΚΧΠ ${currentArtNum}</span>`;
+}
+
+/* Body rendering with clickable cross-references */
+function cleanBody(b){
+  b = b.replace(/^(> [^\n]*\n)+\n?/, "");
+  b = b.replace(/^# [^\n]+\n+/, "");
+  return b.trim();
+}
+function renderBodyWithLinks(body, selfNum){
+  const cleaned = cleanBody(body);
+  let html = esc(cleaned);
+  /* Replace arthro-N patterns — accented Greek chars survive HTML-escaping */
+  html = html.replace(/[άα]ρθρ([αάοόωώυύ]\w*)\s+(\d+)/g, (match, suffix, num) => {
+    const n = +num;
+    if (n !== selfNum && byNum[n]){
+      const title = (byNum[n].t||"").replace(/^Άρθρο \d+\s*—\s*/,"").slice(0,70);
+      // Preserve the original word (e.g. "άρθρου"), only link the number
+      const word = match.replace(/\s+\d+$/, "");
+      return `${word} <a class="xref" onclick="showArt(${n})" title="${esc(title)}">${num}</a>`;
+    }
+    return match;
+  });
+  html = html.replace(/\*\*([^*\n]{1,100})\*\*/g, "<strong>$1</strong>");
+  return html;
+}
+function parseProv(provStr){
+  if (!provStr) return [];
+  return provStr.split(";").map(s=>s.trim()).filter(Boolean).map(s=>{
+    const lm = s.match(/(?:ν\.|ν\.δ\.|π\.δ\.)\s*(\d{4})/i);
+    const am = s.match(/[Άα]ρθρ[οαωυ]\w*\s+([\d\w]+)/);
+    return { raw:s, lawNum:lm?lm[1]:null, artNum:am?am[1]:null };
+  });
+}
+
+function renderArt(n){
+  const v = document.getElementById("artview");
+  const a = byNum[n];
+  if (!a){
+    v.className="empty";
+    v.innerHTML=D.missing.includes(+n)
+      ? `Το άρθρο <b>${n}</b> λείπει από το corpus (γνωστά κενά: ${D.missing.join(", ")}). Συμπλήρωσέ το από το ΦΕΚ Αʹ 88/2026.`
+      : `Δεν υπάρχει άρθρο ${n}.`;
+    return;
+  }
+  v.className="";
+  const provItems=parseProv(a.p);
+  const provHtml=provItems.length
+    ? provItems.map(pi=>{
+        const mapBtn=pi.lawNum
+          ? `<span class="prov-link" onclick="openMapFor('${pi.lawNum}','${esc(pi.artNum||'')}')" title="Δες αντιστοίχιση">↗ αντιστοίχιση</span>`:""
+        ;
+        return `<div class="prov-item"><span>${esc(pi.raw)}</span>${mapBtn}</div>`;
+      }).join("")
+    : `<div class="prov-item" style="font-style:italic;color:var(--muted)">Νέα διάταξη — δεν κωδικοποιεί προγενέστερο νόμο</div>`;
+  const tagsHtml=a.tg
+    ?a.tg.split(",").filter(t=>t.startsWith("thema/")).map(t=>`<span class="pill">${esc(t.replace("thema/",""))}</span>`).join(""):"";
+  v.innerHTML=`
+    <h2>${esc(a.t)}</h2>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:10px">
+      Μέρος ${esc(a.m||"—")} &nbsp;·&nbsp; ${esc(a.tm||"—")} &nbsp;·&nbsp; ΦΕΚ Αʹ 88/8.6.2026
+    </div>
+    ${tagsHtml?`<div style="margin-bottom:10px">${tagsHtml}</div>`:""}
+    <div class="provblock"><b>Κωδικοποιεί:</b>${provHtml}</div>
+    <div id="artbody">${renderBodyWithLinks(a.b, a.a)}</div>`;
+}
+
+function renderSidebar(n){
+  const sb=document.getElementById("artsidebar");
+  const out=outgoingRefs[n]||[];
+  const bk=backlinks[n]||[];
+  function xrefCard(title, items){
+    if (!items.length) return "";
+    const rows=items.slice(0,15).map(r=>{
+      const t=(byNum[r]||{t:""}).t.replace(/^Άρθρο \d+\s*—\s*/,"");
+      return `<a class="xref-item" onclick="showArt(${r})"><span class="xref-num">ΚΧΠ ${r}</span><span class="xref-title">${esc(t)}</span></a>`;
+    }).join("");
+    const more=items.length>15?`<div class="side-more">+ ${items.length-15} ακόμα</div>`:"";
+    return `<div class="sidecard"><h4>${title} <span class="cnt">${items.length}</span></h4>${rows}${more}</div>`;
+  }
+  const html=xrefCard("Αναφέρει", out)+xrefCard("Αναφέρεται από", bk);
+  sb.innerHTML=html||`<div class="sidecard"><div class="side-empty">Χωρίς εσωτερικές παραπομπές ΚΧΠ</div></div>`;
+}
+
+document.getElementById("artnum").addEventListener("input", e => {
+  const n=+e.target.value;
+  if (n>=1 && n<=477){
+    if (currentArtNum!==null && currentArtNum!==n) navStack.push(currentArtNum);
+    currentArtNum=n;
+    _renderAll(n);
+  }
+});
+
+function openMapFor(lawNum, artNum){
+  document.getElementById("mlaw").value=lawNum;
+  document.getElementById("mart").value=artNum||"";
+  goTab("map");
+  doMap();
+}
+
+/* MAPPING */
+const lawCounts={};
+D.mapping.forEach(m=>lawCounts[m.old_law]=(lawCounts[m.old_law]||0)+1);
+const lawlist=document.getElementById("lawlist");
+Object.entries(lawCounts).sort((a,b)=>b[1]-a[1]).forEach(([law])=>{
+  const o=document.createElement("option"); o.value=law; lawlist.appendChild(o);
+});
+function doMap(){
+  const law=norm(document.getElementById("mlaw").value.trim());
+  const art=document.getElementById("mart").value.trim();
+  const out=document.getElementById("mapout");
+  if (!law){out.className="empty";out.textContent="Δώσε νόμο (και προαιρετικά άρθρο).";return;}
+  let rows=D.mapping.filter(m=>norm(m.old_law).includes(law)||norm(m.old_law_raw).includes(law));
+  if (art) rows=rows.filter(m=>m.old_article===art);
+  out.className="";
+  if (!rows.length){out.className="empty";out.textContent="Δεν βρέθηκε αντιστοίχιση.";return;}
+  const seen=new Set();
+  out.innerHTML=rows.filter(m=>{const k=m.raw+"→"+m.new_arthro;if(seen.has(k))return false;seen.add(k);return true;})
+    .sort((a,b)=>a.new_arthro-b.new_arthro).slice(0,200)
+    .map(m=>`<div class="maprow"><span>${esc(m.raw)}</span><span class="arrow">→</span>
+      <a onclick="showArt(${m.new_arthro})">ΚΧΠ ${m.new_arthro}</a>
+      <span style="color:var(--muted);font-size:12.5px">${esc((byNum[m.new_arthro]||{t:""}).t.replace(/^Άρθρο \d+\s*—\s*/,""))}</span></div>`).join("");
+}
+document.getElementById("mlaw").addEventListener("input", doMap);
+document.getElementById("mart").addEventListener("input", doMap);
+
+function doRmap(){
+  const n=+document.getElementById("rmapnum").value;
+  const out=document.getElementById("rmapout");
+  if (!n){out.className="empty";out.textContent="Δώσε αριθμό άρθρου ΚΧΠ.";return;}
+  const rows=D.mapping.filter(m=>m.new_arthro===n);
+  out.className="";
+  const head=byNum[n]?`<div class="maprow" style="font-weight:600">ΚΧΠ ${n} — ${esc((byNum[n].t||"").replace(/^Άρθρο \d+\s*—\s*/,""))} <a onclick="showArt(${n})" style="margin-left:8px;font-weight:400">άνοιγμα</a></div>`:"";
+  out.innerHTML=head+(rows.length
+    ?rows.map(m=>`<div class="maprow"><span class="arrow">←</span><span>${esc(m.raw)}</span></div>`).join("")
+    :`<div class="maprow">Χωρίς καταγεγραμμένη προέλευση (πιθανώς νέα διάταξη).</div>`);
+}
+document.getElementById("rmapnum").addEventListener("input", doRmap);
+
+/* BROWSE */
+const bm=document.getElementById("bmeros"), bt=document.getElementById("btmima");
+function fillTmima(){
+  const m=bm.value;
+  bt.innerHTML='<option value="">Όλα τα Τμήματα</option>';
+  [...new Set(D.articles.filter(a=>!m||a.m===m).map(a=>a.tm).filter(Boolean))]
+    .forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;bt.appendChild(o);});
+  renderBrowse();
+}
+function renderBrowse(){
+  const m=bm.value, t=bt.value;
+  const rows=D.articles.filter(a=>(!m||a.m===m)&&(!t||a.tm===t));
+  document.getElementById("browseout").innerHTML=rows.map(a=>`
+    <div class="maprow"><a onclick="showArt(${a.a})">ΚΧΠ ${a.a}</a>
+      <span>${esc(a.t.replace(/^Άρθρο \d+\s*—\s*/,""))}</span>
+      <span style="color:var(--muted);font-size:12px;margin-left:auto">${esc(a.tm||"")}</span></div>`).join("")
+    ||`<div class="empty">—</div>`;
+}
+bm.addEventListener("change", fillTmima);
+bt.addEventListener("change", renderBrowse);
+
+/* UPDATES (domiki.gr calendar watch) */
+const U = window.DOMIKI_UPDATES || {generated:"—", items:[]};
+const SRC_LABEL = {new:"Νέο", enforce:"Έναρξη ισχύος", changes:"Αλλαγή κωδικοποίησης"};
+U.items.forEach(x => { x.nt = norm(x.title); });
+(function(){
+  const c=document.getElementById("updcnt");
+  const cutoff=new Date(Date.now()-14*864e5).toISOString().slice(0,10);
+  const n=U.items.filter(x=>x.source==="new"&&(x.first_seen||x.date)>=cutoff).length;
+  if (n){c.textContent=n;c.style.display="";}
+})();
+function fekLabel(f){ return f ? `ΦΕΚ ${f.teuxos}΄ ${f.num}/${f.year}` : ""; }
+function groupKey(x){
+  const f=x.fek?`${x.fek.teuxos}${x.fek.num}/${x.fek.year}`:"";
+  return `${x.source}|${x.kind}|${x.ref}|${f}`;
+}
+function renderUpdates(){
+  const q=norm(document.getElementById("uq").value.trim());
+  const src=document.getElementById("usrc").value;
+  const scope=document.getElementById("uscope").value;
+  const days=+document.getElementById("udays").value;
+  const cutoff=days?new Date(Date.now()-days*864e5).toISOString().slice(0,10):"";
+  const words=q.split(/\s+/).filter(Boolean);
+  let rows=U.items.filter(x=>(!src||x.source===src)&&(!scope||x.scope===scope)
+    &&(!cutoff||(x.first_seen||x.date)>=cutoff)&&words.every(w=>x.nt.includes(w)));
+  // group by law/decision + ΦΕΚ
+  const groups=new Map();
+  for (const x of rows){
+    const k=groupKey(x);
+    if (!groups.has(k)) groups.set(k,{head:x,items:[]});
+    groups.get(k).items.push(x);
+  }
+  const gl=[...groups.values()].sort((a,b)=>(b.head.date+b.head.first_seen).localeCompare(a.head.date+a.head.first_seen));
+  document.getElementById("updstats").textContent=`${rows.length} καταχωρήσεις σε ${gl.length} ομάδες · τελευταίος έλεγχος: ${U.generated}`;
+  const out=document.getElementById("updout");
+  if (!gl.length){out.innerHTML=`<div class="empty">Καμία ενημέρωση για τα φίλτρα.</div>`;return;}
+  out.innerHTML=gl.slice(0,300).map(g=>{
+    const h=g.head, f=h.fek;
+    const pdfLocal=g.items.find(i=>i.pdf&&(i.pdf_status==="downloaded"||i.pdf_status==="exists"));
+    const links=[
+      h.et_url?`<a class="prov-link" href="${esc(h.et_url)}" target="_blank" rel="noopener">ΦΕΚ PDF (ΕΤ)</a>`:"",
+      pdfLocal?`<a class="prov-link" href="../../${esc(pdfLocal.pdf).replace(/\\\\/g,"/")}" target="_blank">τοπικό PDF</a>`:"",
+    ].filter(Boolean).join(" ");
+    let title=h.title.replace(/\s*ΦΕΚ-\S+\s*$/,"").replace(/\s+Αρθ-.*$/,"").replace(/\s+ΑΡΘΡΟΝ-.*$/,"").replace(/\s*-\s*ΠΕΡΙΕΧΟΜΕΝΑ\s*$/,"");
+    if (h.ref) title=title.replace(new RegExp("^"+(h.kind+"-"+h.ref).replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&")+"\\s*","i"),"");
+    if (h.source==="changes") title=`Τροποποιημένα άρθρα στην κωδικοποίηση domiki (${g.items.length})`;
+    else if (!title && g.items.length>1) title=`Νόμος — ${g.items.length} ομάδες άρθρων (βλ. παρακάτω)`;
+    const arts=g.items.filter(i=>/Αρθ-|ΑΡΘΡΟΝ-|Μέρος|Παράρτημα/.test(i.title)).map(i=>{
+      let t=i.title.replace(/^\S+\s+/,"").replace(/\s*ΦΕΚ-\S+\s*$/,"");
+      // link ΚΧΠ articles of Ν-5306/26
+      const m=/^Αρθ-(\d+)/.exec(t);
+      if (h.ref.startsWith("5306/26")&&m&&byNum[+m[1]]) t=t.replace(/^Αρθ-(\d+)/,`<a class="xref" onclick="showArt(${+m[1]})">ΚΧΠ $1</a>`);
+      else t=esc(t);
+      return `<div class="maprow" style="padding:4px 0;font-size:13px">${t}</div>`;
+    }).join("");
+    const pills=`<span class="pill">${esc(SRC_LABEL[h.source]||h.source)}</span>`+
+      (h.scope==="crete"?`<span class="pill" style="background:#dbeee0;color:#256b3a">Κρήτη</span>`:"")+
+      (f?`<span class="pill">${fekLabel(f)}</span>`:"");
+    return `<div class="card" style="cursor:default">
+      <h3><span class="num">${esc(h.kind==="ΑΛΛΟ"?"":h.kind+"-"+h.ref)}</span>${esc(title)}</h3>
+      <div class="meta">${pills} · καταχώρηση ${esc(h.date)} · ${g.items.length>1?g.items.length+" εγγραφές · ":""}${links}</div>
+      ${arts&&g.items.length>1?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted)">Άρθρα / τμήματα (${g.items.length})</summary>${arts}</details>`:""}
+    </div>`;
+  }).join("");
+}
+for (const id of ["uq","usrc","uscope","udays"]) document.getElementById(id).addEventListener(id==="uq"?"input":"change", renderUpdates);
+document.querySelector('nav button[data-tab=upd]').addEventListener("click", renderUpdates);
+</script>
+</body>
+</html>
