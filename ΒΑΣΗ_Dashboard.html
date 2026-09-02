@@ -534,8 +534,16 @@ function wordDiff(a, b){
   while(i<n) delBuf.push(A[i++]); while(j<m) insBuf.push(B[j++]); flush();
   return out.join(" ");
 }
-const reflow = s => { s=(s||""); if (s.includes("\n")) return s;   // flat κείμενο (ΦΕΚ) → σπάσε σε παραγράφους/υποπεριπτώσεις
-  return s.replace(/^Άρθρο\s+\d+[Α-Ω]?\s+[^.]*?(?=\s1\.\s)/,"").replace(/\s(?=\d{1,2}[Α-Ω]?\.\s[Α-ΩΆ-Ώ«(])/g,"\n").replace(/\s(?=[α-ω]{1,3}\)\s)/g,"\n"); };
+const reflow = s => { s=(s||""); if (s.includes("\n")) return s;   // flat κείμενο (ΦΕΚ) → παράγραφοι με ΑΥΞΟΥΣΑ αρίθμηση (1., 2., 3., 3Α., 4. …)
+  s=s.replace(/^Άρθρο\s+\d+[Α-Ω]?\s+[^.]*?(?=\s1\.\s)/,"");
+  let out="", expectN=1, expectSfx="", last=0; const re=/\s(\d{1,2})([Α-Ω]?)\.\s(?=[Α-ΩΆ-Ώ«(α-ω])/g; let m;
+  while((m=re.exec(s))){ const n=+m[1], sfx=m[2];
+    const ok = (n===expectN && sfx==="") || (n===expectN-1 && sfx && sfx>expectSfx) || (n===expectN-1 && sfx==="Α" && expectSfx==="");
+    if(!ok) continue;
+    out+=s.slice(last,m.index)+"\n"; last=m.index+1; if(sfx){expectSfx=sfx;} else {expectN=n+1; expectSfx="";} }
+  out+=s.slice(last);
+  return out.replace(/\s(?=[α-ω]{1,3}\)\s)/g,"\n"); };
+const stripFooter = s => (s||"").split(/\n---|\n## /)[0];
 const splitParas = s => reflow(s).replace(/-\n\s*(?=[α-ωά-ώ])/g,"").split(/\n\s*\n|\n(?=\s*(?:\d{1,2}[Α-Ω]?\.|[α-ω]{1,3}[.)]|[α-ω]{2,3}[.)])\s)/).map(x=>dnorm(x)).filter(Boolean);
 /* diff ανά παράγραφο: ταιριάζει ίδιες παραγράφους, word-diff μόνο στις αλλαγμένες */
 function paraDiff(a, b){
@@ -572,7 +580,7 @@ function renderAmendBox(n){
 }
 function showAmendDiff(n, idx){
   const x=AM[idx]; const el=document.getElementById("amenddiff"); if(!el) return;
-  const old=(x.old_text||"").replace(/^\d+[Α-Ω]?\.\s*/,""), nw=(x.new_text||"").replace(/^\d+[Α-Ω]?\.\s*/,"");
+  const old=stripFooter(x.old_text||"").replace(/^\d+[Α-Ω]?\.\s*/,""), nw=(x.new_text||"").replace(/^\d+[Α-Ω]?\.\s*/,"");
   el.innerHTML=`<div class="legend"><del class="d">διαγραφή</del> <ins class="d">προσθήκη</ins> — ${x.target_par?"παρ. "+esc(x.target_par):"άρθρο"} πριν → μετά (${esc(x.law)} αρ.${esc(x.law_article)})</div>
     <div class="hist-law" style="background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px">${x.target_par?wordDiff(old,nw):paraDiff(old,nw)}</div>`;
 }
