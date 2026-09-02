@@ -536,7 +536,8 @@ function renderUpdates(){
     const pdfLocal=g.items.find(i=>i.pdf&&(i.pdf_status==="downloaded"||i.pdf_status==="exists"));
     const links=[
       h.et_url?`<a class="prov-link" href="${esc(h.et_url)}" target="_blank" rel="noopener">ΦΕΚ PDF (ΕΤ)</a>`:"",
-      pdfLocal?`<a class="prov-link" href="../../${esc(pdfLocal.pdf).replace(/\\\\/g,"/")}" target="_blank">τοπικό PDF</a>`:"",
+      (pdfLocal&&(location.protocol==="file:"||/^(localhost|127\.0\.0\.1)$/.test(location.hostname)))
+        ?`<a class="prov-link" href="../../${esc(pdfLocal.pdf).replace(/\\\\/g,"/")}" target="_blank">τοπικό PDF</a>`:"",
     ].filter(Boolean).join(" ");
     let title=h.title.replace(/\s*ΦΕΚ-\S+\s*$/,"").replace(/\s+Αρθ-.*$/,"").replace(/\s+ΑΡΘΡΟΝ-.*$/,"").replace(/\s*-\s*ΠΕΡΙΕΧΟΜΕΝΑ\s*$/,"");
     if (h.ref) title=title.replace(new RegExp("^"+(h.kind+"-"+h.ref).replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&")+"\\s*","i"),"");
