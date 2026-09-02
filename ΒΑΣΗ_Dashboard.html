@@ -534,7 +534,9 @@ function wordDiff(a, b){
   while(i<n) delBuf.push(A[i++]); while(j<m) insBuf.push(B[j++]); flush();
   return out.join(" ");
 }
-const splitParas = s => (s||"").replace(/-\n\s*(?=[α-ωά-ώ])/g,"").split(/\n\s*\n|\n(?=\s*(?:\d{1,2}[Α-Ω]?\.|[α-ω]{1,3}[.)]|[α-ω]{2,3}[.)])\s)/).map(x=>dnorm(x)).filter(Boolean);
+const reflow = s => { s=(s||""); if (s.includes("\n")) return s;   // flat κείμενο (ΦΕΚ) → σπάσε σε παραγράφους/υποπεριπτώσεις
+  return s.replace(/^Άρθρο\s+\d+[Α-Ω]?\s+[^.]*?(?=\s1\.\s)/,"").replace(/\s(?=\d{1,2}[Α-Ω]?\.\s[Α-ΩΆ-Ώ«(])/g,"\n").replace(/\s(?=[α-ω]{1,3}\)\s)/g,"\n"); };
+const splitParas = s => reflow(s).replace(/-\n\s*(?=[α-ωά-ώ])/g,"").split(/\n\s*\n|\n(?=\s*(?:\d{1,2}[Α-Ω]?\.|[α-ω]{1,3}[.)]|[α-ω]{2,3}[.)])\s)/).map(x=>dnorm(x)).filter(Boolean);
 /* diff ανά παράγραφο: ταιριάζει ίδιες παραγράφους, word-diff μόνο στις αλλαγμένες */
 function paraDiff(a, b){
   const PA=splitParas(a), PB=splitParas(b);
