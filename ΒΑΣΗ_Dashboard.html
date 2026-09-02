@@ -95,6 +95,34 @@ h2.sec{font-size:16px;margin:22px 0 10px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}}
 .panelbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+/* Diff / history */
+ins.d{background:#d8f3dc;color:#0b5d1e;text-decoration:none;border-radius:2px;padding:0 1px}
+del.d{background:#fde2e1;color:#9b1c1c;text-decoration:line-through;border-radius:2px;padding:0 1px}
+@media (prefers-color-scheme: dark){ins.d{background:#173d22;color:#9be7a8}del.d{background:#4a1c1c;color:#f3a3a3}}
+.hist-note{background:#fff8dc;border-left:3px solid #e6b74a;padding:6px 10px;margin:6px 0;font-size:12.5px;border-radius:0 6px 6px 0}
+@media (prefers-color-scheme: dark){.hist-note{background:#3a2f12;border-color:#b58a1c}}
+.hist-comm{color:var(--muted);font-size:12.5px;padding:4px 10px;border-left:3px solid var(--line);margin:4px 0}
+.hist-law{white-space:pre-wrap;font-size:13.5px;line-height:1.7}
+.hist-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.hist-tabs button{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12.5px}
+.hist-tabs button.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.lawchip{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:0 6px;font-size:11.5px;font-family:var(--mono);margin:1px 2px}
+.partag{display:inline-block;background:#e8eef9;color:#2b4a8f;border-radius:4px;padding:0 6px;font-size:11px;font-family:var(--mono);margin-left:6px;vertical-align:middle}
+@media (prefers-color-scheme: dark){.partag{background:#1f2a44;color:#9fb6ee}}
+.amend-box{border:1px solid #e6b74a;background:#fff8dc;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px}
+@media (prefers-color-scheme: dark){.amend-box{background:#3a2f12;border-color:#b58a1c}}
+.amend-box b{color:#8a5a00}
+.legend{font-size:11.5px;color:var(--muted);margin:6px 0}
+/* Favorites / recent */
+.starbtn{float:right;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:6px;padding:2px 9px;cursor:pointer;font-size:13px;margin-left:8px}
+.starbtn.on{color:#c9860c;border-color:#e6b74a;background:#fff6dc}
+@media (prefers-color-scheme: dark){.starbtn.on{background:#3a2f12}}
+.fav-item{display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px solid var(--line);font-size:13px}
+.fav-item:last-child{border-bottom:none}
+.fav-item a{cursor:pointer;color:inherit;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav-item .xref-num{flex:0 0 auto}
+.fav-item .rm{color:var(--muted);cursor:pointer;font-size:12px;flex:0 0 auto}
+.fav-item .rm:hover{color:#b3261e}
 /* Mobile / responsive */
 nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap}
 nav::-webkit-scrollbar{display:none}
@@ -138,6 +166,7 @@ nav button{white-space:nowrap;flex:0 0 auto}
   <button data-tab="art">📖 Άρθρο</button>
   <button data-tab="map">🔁 Αντιστοίχιση παλιό↔νέο</button>
   <button data-tab="browse">🗂️ Πλοήγηση</button>
+  <button data-tab="docs">📄 Έγγραφα</button>
   <button data-tab="upd">🆕 Ενημερώσεις <span class="cnt" id="updcnt" style="display:none"></span></button>
 </nav>
 <main>
@@ -160,7 +189,10 @@ nav button{white-space:nowrap;flex:0 0 auto}
   <div class="breadcrumb" id="breadcrumb"></div>
   <div id="art-outer">
     <div id="artview" class="empty">Δώσε αριθμό άρθρου (1–477).</div>
-    <div id="artsidebar"></div>
+    <div>
+      <div id="favbox"></div>
+      <div id="artsidebar"></div>
+    </div>
   </div>
 </section>
 
@@ -193,6 +225,16 @@ nav button{white-space:nowrap;flex:0 0 auto}
     <select id="btmima"><option value="">Όλα τα Τμήματα</option></select>
   </div>
   <div id="browseout"></div>
+</section>
+
+<section class="tab" id="tab-docs">
+  <div class="row">
+    <input type="text" id="dq" placeholder="Αναζήτηση σε ΦΕΚ, εγκυκλίους, Κτιριοδομικό, ΝΟΚ (win2), τεχνικές σημειώσεις… (Enter)">
+    <select id="dcat" class="narrow"><option value="">Όλες οι κατηγορίες</option></select>
+  </div>
+  <div class="stats" id="docstats">Πληκτρολόγησε 2+ λέξεις-κλειδιά και πάτα Enter. Η αναζήτηση φορτώνει μόνο τα έγγραφα που περιέχουν τις λέξεις.</div>
+  <div id="docout"></div>
+  <div class="notice">Κείμενο από pdftotext — σε σκαναρισμένα ή με προβληματική γραμματοσειρά PDF μπορεί να λείπουν σελίδες. Πάντα άνοιξε το πρωτότυπο.</div>
 </section>
 
 <section class="tab" id="tab-upd">
@@ -262,7 +304,7 @@ for (const a of D.articles) {
 for (const k of Object.keys(backlinks)) backlinks[k].sort((a,b)=>+a-+b);
 
 document.getElementById("substats").textContent =
-  `${D.articles.length}/477 άρθρα · ${D.mapping.length} αντιστοιχίσεις παλιό⇔νέο · index: ${D.generated}` +
+  `${D.articles.length} άρθρα · ${D.mapping.length} αντιστοιχίσεις παλιό⇔νέο · ${(D.amendments||[]).length} τροποποιήσεις μετά την κωδικοποίηση · index: ${D.generated}` +
   (D.missing.length ? ` · λείπουν: ${D.missing.join(", ")}` : "");
 
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
@@ -331,11 +373,12 @@ const navStack = [];
 let currentArtNum = null;
 
 function showArt(n){
-  n = +n;
+  n = /^\d+$/.test(String(n)) ? +n : String(n);
   if (currentArtNum !== null && currentArtNum !== n) navStack.push(currentArtNum);
   currentArtNum = n;
   goTab("art");
   document.getElementById("artnum").value = n;
+  try{ history.replaceState(null,"","#a/"+n); }catch(e){}
   _renderAll(n);
 }
 function goBack(){
@@ -345,7 +388,7 @@ function goBack(){
   _renderAll(currentArtNum);
 }
 function jumpTo(n){
-  n = +n;
+  n = /^\d+$/.test(String(n)) ? +n : String(n);
   const idx = navStack.lastIndexOf(n);
   if (idx !== -1) navStack.splice(idx);
   navStack.push(currentArtNum);
@@ -353,10 +396,37 @@ function jumpTo(n){
   document.getElementById("artnum").value = n;
   _renderAll(n);
 }
+/* FAVORITES / RECENT (localStorage — ανά συσκευή) */
+const LS = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+             set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } };
+let favs = LS.get("vasi_favs", []);
+let recent = LS.get("vasi_recent", []);
+function toggleFav(n){
+  n=+n; const i=favs.indexOf(n);
+  if (i>=0) favs.splice(i,1); else favs.unshift(n);
+  LS.set("vasi_favs", favs); renderFavBox(); const b=document.getElementById("starbtn"); if(b) b.className="starbtn"+(favs.includes(n)?" on":"");
+}
+function pushRecent(n){
+  n=+n; recent=[n,...recent.filter(x=>x!==n)].slice(0,12); LS.set("vasi_recent", recent); renderFavBox();
+}
+function favRow(n, removable){
+  const t=(byNum[n]||{t:""}).t.replace(/^Άρθρο \d+\s*—\s*/,"");
+  return `<div class="fav-item"><span class="xref-num">ΚΧΠ ${n}</span><a onclick="showArt(${n})" title="${esc(t)}">${esc(t)}</a>${removable?`<span class="rm" onclick="toggleFav(${n})" title="Αφαίρεση">✕</span>`:""}</div>`;
+}
+function renderFavBox(){
+  const el=document.getElementById("favbox"); if(!el) return;
+  const f=favs.filter(n=>byNum[n]).map(n=>favRow(n,true)).join("");
+  const r=recent.filter(n=>byNum[n]&&!favs.includes(n)).slice(0,8).map(n=>favRow(n,false)).join("");
+  el.innerHTML=(f?`<div class="sidecard"><h4>★ Αγαπημένα <span class="cnt">${favs.length}</span></h4>${f}</div>`:"")+
+               (r?`<div class="sidecard"><h4>Πρόσφατα</h4>${r}</div>`:"");
+}
+
 function _renderAll(n){
   renderArt(n);
   renderSidebar(n);
+  renderHistCard(n);
   renderBreadcrumb();
+  pushRecent(n);
   const el = document.getElementById("artview");
   if (el) el.scrollIntoView({behavior:"smooth", block:"start"});
 }
@@ -428,13 +498,145 @@ function renderArt(n){
   const tagsHtml=a.tg
     ?a.tg.split(",").filter(t=>t.startsWith("thema/")).map(t=>`<span class="pill">${esc(t.replace("thema/",""))}</span>`).join(""):"";
   v.innerHTML=`
+    <button id="starbtn" class="starbtn${favs.includes(a.a)?" on":""}" onclick="toggleFav(${a.a})" title="Αγαπημένο">★</button>
     <h2>${esc(a.t)}</h2>
     <div style="color:var(--muted);font-size:13px;margin-bottom:10px">
       Μέρος ${esc(a.m||"—")} &nbsp;·&nbsp; ${esc(a.tm||"—")} &nbsp;·&nbsp; ΦΕΚ Αʹ 88/8.6.2026
     </div>
     ${tagsHtml?`<div style="margin-bottom:10px">${tagsHtml}</div>`:""}
     <div class="provblock"><b>Κωδικοποιεί:</b>${provHtml}</div>
-    <div id="artbody">${renderBodyWithLinks(a.b, a.a)}</div>`;
+    ${renderAmendBox(a.a)}
+    <div id="artbody">${renderBodyWithLinks(a.b, a.a)}</div>
+    <div id="histview"></div>`;
+}
+
+/* ===== ΤΡΟΠΟΠΟΙΗΣΕΙΣ ΚΩΔΙΚΑ (amendments.json → D.amendments) + ΙΣΤΟΡΙΚΟ ΝΟΚ (win2) ===== */
+const AM = (D.amendments||[]);
+const amendsFor = n => AM.filter(x => String(x.target)===String(n) && !["manual","par_not_found","words_not_found","no_article","exists","no_text"].includes(x.status));
+const amendsPending = n => AM.filter(x => String(x.target)===String(n) && ["manual","par_not_found","words_not_found"].includes(x.status));
+
+/* word diff: LCS σε λέξεις (με όριο), fallback σε απλή σύγκριση */
+const dnorm = s => (s||"").replace(/-\n\s*(?=[α-ωά-ώ])/g,"").replace(/\s+/g," ").trim();
+function tokenize(s){ return dnorm(s).split(" ").filter(x=>x.length); }
+function wordDiff(a, b){
+  const A=tokenize(a), B=tokenize(b);
+  if (A.length*B.length > 4e6) return `<del class="d">${esc(a)}</del> <ins class="d">${esc(b)}</ins>`;
+  const n=A.length, m=B.length; const dp=new Uint16Array((n+1)*(m+1));
+  for (let i=n-1;i>=0;i--) for (let j=m-1;j>=0;j--)
+    dp[i*(m+1)+j] = A[i]===B[j] ? dp[(i+1)*(m+1)+j+1]+1 : Math.max(dp[(i+1)*(m+1)+j], dp[i*(m+1)+j+1]);
+  let i=0,j=0,out=[],delBuf=[],insBuf=[];
+  const flush=()=>{ if(delBuf.length){out.push(`<del class="d">${esc(delBuf.join(" "))}</del>`);delBuf=[];} if(insBuf.length){out.push(`<ins class="d">${esc(insBuf.join(" "))}</ins>`);insBuf=[];} };
+  while(i<n&&j<m){
+    if (A[i]===B[j]){ flush(); out.push(esc(A[i])); i++; j++; }
+    else if (dp[(i+1)*(m+1)+j] >= dp[i*(m+1)+j+1]) { delBuf.push(A[i]); i++; }
+    else { insBuf.push(B[j]); j++; }
+  }
+  while(i<n) delBuf.push(A[i++]); while(j<m) insBuf.push(B[j++]); flush();
+  return out.join(" ");
+}
+const splitParas = s => (s||"").replace(/-\n\s*(?=[α-ωά-ώ])/g,"").split(/\n\s*\n|\n(?=\s*(?:\d{1,2}[Α-Ω]?\.|[α-ω]{1,3}[.)]|[α-ω]{2,3}[.)])\s)/).map(x=>dnorm(x)).filter(Boolean);
+/* diff ανά παράγραφο: ταιριάζει ίδιες παραγράφους, word-diff μόνο στις αλλαγμένες */
+function paraDiff(a, b){
+  const PA=splitParas(a), PB=splitParas(b);
+  const n=PA.length,m=PB.length; const dp=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--) dp[i][j]=PA[i]===PB[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  let i=0,j=0,out=[],pendA=[],pendB=[];
+  const flush=()=>{ const k=Math.max(pendA.length,pendB.length);
+    for(let q=0;q<k;q++){ const x=pendA[q], y=pendB[q];
+      if(x!==undefined&&y!==undefined) out.push(`<p>${wordDiff(x,y)}</p>`);
+      else if(x!==undefined) out.push(`<p><del class="d">${esc(x)}</del></p>`);
+      else out.push(`<p><ins class="d">${esc(y)}</ins></p>`); }
+    pendA=[];pendB=[]; };
+  while(i<n&&j<m){
+    if(PA[i]===PB[j]){ flush(); out.push(`<p>${esc(PA[i])}</p>`); i++; j++; }
+    else if(dp[i+1][j]>=dp[i][j+1]){ pendA.push(PA[i]); i++; } else { pendB.push(PB[j]); j++; }
+  }
+  while(i<n)pendA.push(PA[i++]); while(j<m)pendB.push(PB[j++]); flush();
+  return out.join("");
+}
+
+function renderAmendBox(n){
+  const list=amendsFor(n), pend=amendsPending(n);
+  if (!list.length && !pend.length) return "";
+  const rows=list.map((x,i)=>`<div style="margin:4px 0">
+      <b>${esc(x.fek_date)}</b> · ${esc(x.law)} άρθρο ${esc(x.law_article)} (ΦΕΚ ${esc(x.fek)}) —
+      ${x.kind==="add_article"?"προσθήκη άρθρου":x.kind==="repeal"?"κατάργηση":x.kind==="add"?"προσθήκη":"αντικατάσταση"} ${x.target_par?"παρ. "+esc(x.target_par):(x.kind==="add_article"?"":"ολόκληρου άρθρου")}
+      ${x.old_text&&x.new_text?`· <a class="prov-link" onclick="showAmendDiff(${n},${AM.indexOf(x)})">δείξε αλλαγές</a>`:""}
+      <a class="prov-link" href="${esc(x.et_url)}" target="_blank" rel="noopener">ΦΕΚ</a>
+      <span style="color:var(--muted);font-size:11.5px"> «${esc((x.law_article_title||"").slice(0,80))}»</span></div>`).join("");
+  const prows=pend.map(x=>`<div style="margin:4px 0;color:var(--muted)">⚠ ${esc(x.fek_date)} · ${esc(x.law)} αρ.${esc(x.law_article)}: ${esc(x.kind)} παρ.${esc(x.target_par||"—")} — δεν εφαρμόστηκε αυτόματα (${esc(x.status)}). Έλεγξε το <a href="${esc(x.et_url)}" target="_blank">ΦΕΚ</a>.</div>`).join("");
+  return `<div class="amend-box"><b>Τροποποιήσεις μετά την κωδικοποίηση (${list.length+pend.length})</b>${rows}${prows}
+    <div id="amenddiff"></div></div>`;
+}
+function showAmendDiff(n, idx){
+  const x=AM[idx]; const el=document.getElementById("amenddiff"); if(!el) return;
+  const old=(x.old_text||"").replace(/^\d+[Α-Ω]?\.\s*/,""), nw=(x.new_text||"").replace(/^\d+[Α-Ω]?\.\s*/,"");
+  el.innerHTML=`<div class="legend"><del class="d">διαγραφή</del> <ins class="d">προσθήκη</ins> — ${x.target_par?"παρ. "+esc(x.target_par):"άρθρο"} πριν → μετά (${esc(x.law)} αρ.${esc(x.law_article)})</div>
+    <div class="hist-law" style="background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px">${x.target_par?wordDiff(old,nw):paraDiff(old,nw)}</div>`;
+}
+
+/* Ιστορικό ΝΟΚ (win2) — lazy: history/<ΚΧΠ>.json */
+const HIST = { index:null, cache:{} };
+async function histIndex(){
+  if (HIST.index) return HIST.index;
+  try{ HIST.index = await fetch("history/index.json").then(r=>r.json()); }catch(e){ HIST.index={articles:{},versions:[]}; }
+  return HIST.index;
+}
+async function renderHistCard(n){
+  const sb=document.getElementById("artsidebar"); if(!sb) return;
+  if (location.protocol==="file:") return;
+  const idx=await histIndex(); const h=idx.articles[String(n)];
+  const list=amendsFor(n);
+  let html="";
+  if (list.length) html+=`<div class="sidecard"><h4>Τροποποιήσεις ΚΧΠ <span class="cnt">${list.length}</span></h4>${list.map(x=>`<div class="fav-item"><span class="xref-num">${esc(x.fek_date)}</span><a onclick="document.querySelector('.amend-box')?.scrollIntoView({behavior:'smooth'})">${esc(x.law)} αρ.${esc(x.law_article)} → ${x.target_par?"παρ. "+esc(x.target_par):"άρθρο"}</a></div>`).join("")}</div>`;
+  if (h) html+=`<div class="sidecard"><h4>Πριν τον Κώδικα — ΝΟΚ <span class="cnt">αρ. ${h.nok.join(", ")}</span></h4>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">Τροποποιητικοί νόμοι ΝΟΚ:</div>
+      <div>${h.laws.map(l=>`<span class="lawchip">${esc(l)}</span>`).join("")||"—"}</div>
+      <div style="margin-top:8px"><a class="prov-link" onclick="showNokHistory(${n})">Ιστορικό & σύγκριση ΝΟΚ → ΚΧΠ</a></div>
+      ${h.changed?`<div style="font-size:11.5px;color:var(--muted);margin-top:4px">Υπάρχουν διαφορές μεταξύ εκδόσεων win2</div>`:""}</div>`;
+  if (html) sb.insertAdjacentHTML("afterbegin", html);
+}
+function stripKxpBody(b){
+  b=cleanBody(b); return b.replace(/^> .*$/gm,"").replace(/\*\*/g,"").trim();
+}
+async function showNokHistory(n){
+  const el=document.getElementById("histview"); if(!el) return;
+  el.innerHTML=`<div class="stats">Φόρτωση ιστορικού…</div>`;
+  let h=HIST.cache[n];
+  if (!h){ try{ h=HIST.cache[n]=await fetch(`history/${n}.json`).then(r=>r.json()); }catch(e){ el.innerHTML=`<div class="empty">Δεν βρέθηκε ιστορικό.</div>`; return; } }
+  const kxp=byNum[n];
+  const blocks=h.nok.map((nk,ni)=>{
+    const vs=nk.versions; const last=vs[vs.length-1];
+    const tabs=[`<button class="active" onclick="histTab(this,'h${ni}-cmp')">ΝΟΚ ${esc(nk.art)} → ΚΧΠ ${n}</button>`]
+      .concat(vs.map((v,vi)=>`<button onclick="histTab(this,'h${ni}-v${vi}')">win2 ${esc(v.ver)}${v.changed_from_prev?" ●":""}</button>`))
+      .concat([`<button onclick="histTab(this,'h${ni}-notes')">Σημειώσεις/εγκύκλιοι (${last.notes.length})</button>`]);
+    const cmp=`<div id="h${ni}-cmp" class="histpane"><div class="legend"><del class="d">ΝΟΚ αρ.${esc(nk.art)} (win2 ${esc(last.ver)}, έως ${esc(last.latest_law)})</del> → <ins class="d">ΚΧΠ ${n}</ins> — τι άλλαξε η κωδικοποίηση (word-diff)</div>
+      <div class="hist-law">${paraDiff(last.text, stripKxpBody(kxp.b))}</div></div>`;
+    const vers=vs.map((v,vi)=>{
+      const prev=vi>0?vs[vi-1]:null;
+      const tags=Object.entries(v.par_tags||{}).map(([p,ls])=>`<span class="partag">§${esc(p)}: ${esc(ls.join(", "))}</span>`).join(" ");
+      const body= prev&&v.changed_from_prev ? `<div class="legend">Διαφορές από win2 ${esc(prev.ver)} → ${esc(v.ver)}</div><div class="hist-law">${paraDiff(prev.text,v.text)}</div>`
+                 : `<div class="hist-law">${esc(v.text)}</div>`;
+      return `<div id="h${ni}-v${vi}" class="histpane" hidden>
+        <div style="font-size:12.5px;color:var(--muted)">Έκδοση win2 ${esc(v.ver)} · έως ${esc(v.latest_law)} · τροποποιητικοί: ${(v.laws||[]).map(l=>`<span class="lawchip">${esc(l)}</span>`).join("")}</div>
+        <div style="margin:6px 0">${tags}</div>
+        ${(v.notes||[]).filter(t=>/^Ισχύς/.test(t)).map(t=>`<div class="hist-note">${esc(t)}</div>`).join("")}
+        ${body}</div>`;
+    }).join("");
+    const notes=`<div id="h${ni}-notes" class="histpane" hidden>
+        ${(last.notes||[]).map(t=>`<div class="hist-note">${esc(t)}</div>`).join("")||"<div class='empty'>—</div>"}
+        ${(last.comm||[]).length?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted);margin-top:8px">Σχόλια/ερμηνείες win2 (${last.comm.length})</summary>${last.comm.map(t=>`<div class="hist-comm">${esc(t)}</div>`).join("")}</details>`:""}
+        ${(last.expl||[]).length?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted);margin-top:8px">Αιτιολογική έκθεση ΝΟΚ</summary>${last.expl.map(t=>`<div class="hist-comm">${esc(t)}</div>`).join("")}</details>`:""}</div>`;
+    return `<div class="sidecard" style="margin-top:14px"><h4>Ιστορικό: ΝΟΚ (ν.4067/2012) άρθρο ${esc(nk.art)} — ${esc(nk.title)}</h4>
+      <div class="hist-tabs">${tabs.join("")}</div>${cmp}${vers}${notes}</div>`;
+  });
+  el.innerHTML=blocks.join("")+`<div class="notice">Πηγή ιστορικού: κωδικοποιήσεις ΝΟΚ win2.gr (μεταφορά αυτούσια, χωρίς επεξεργασία). Οι σημάνσεις §: Ν.xxxx/yy δείχνουν τον νόμο που τροποποίησε τελευταία κάθε παράγραφο. Το ισχύον δίκαιο είναι ο Κώδικας.</div>`;
+  el.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function histTab(btn,id){
+  const card=btn.closest(".sidecard");
+  card.querySelectorAll(".hist-tabs button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  card.querySelectorAll(".histpane").forEach(p=>p.hidden=(p.id!==id));
 }
 
 function renderSidebar(n){
@@ -454,6 +656,9 @@ function renderSidebar(n){
   sb.innerHTML=html||`<div class="sidecard"><div class="side-empty">Χωρίς εσωτερικές παραπομπές ΚΧΠ</div></div>`;
 }
 
+renderFavBox();
+/* deep link: #a/206 */
+(function(){ const m=/^#a\/(\d+)/.exec(location.hash); if (m && byNum[+m[1]]) showArt(+m[1]); })();
 document.getElementById("artnum").addEventListener("input", e => {
   const n=+e.target.value;
   if (n>=1 && n<=477){
@@ -529,6 +734,80 @@ function renderBrowse(){
 }
 bm.addEventListener("change", fillTmima);
 bt.addEventListener("change", renderBrowse);
+
+/* DOCUMENTS (PDF / εγκύκλιοι) — lazy: manifest + prefix index, μετά μόνο τα έγγραφα-υποψήφιοι */
+const DOCS = { manifest:null, terms:null, cache:{}, base:"docs/" };
+const isLocal = location.protocol==="file:";
+async function docsInit(){
+  if (DOCS.manifest) return true;
+  if (isLocal){ document.getElementById("docstats").textContent="Η αναζήτηση εγγράφων δουλεύει online (GitHub Pages) ή με τοπικό server — όχι από file://."; return false; }
+  document.getElementById("docstats").textContent="Φόρτωση ευρετηρίου…";
+  try{
+    const [m,t]=await Promise.all([fetch(DOCS.base+"manifest.json").then(r=>r.json()), fetch(DOCS.base+"terms.json").then(r=>r.json())]);
+    DOCS.manifest=m; DOCS.terms=t;
+    const cats=[...new Set(m.docs.map(d=>d.cat))].sort();
+    const sel=document.getElementById("dcat"); cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});
+    document.getElementById("docstats").textContent=`${m.n} έγγραφα · ${m.docs.reduce((s,d)=>s+d.n,0)} σελίδες · index ${m.generated}`;
+    return true;
+  }catch(e){ document.getElementById("docstats").textContent="Δεν φορτώθηκε το ευρετήριο εγγράφων ("+e.message+")."; return false; }
+}
+function bitsHas(b64, id){
+  const bin=atob(b64); const byte=bin.charCodeAt(id>>3); return !!(byte & (1<<(id&7)));
+}
+async function docSearch(){
+  const qraw=document.getElementById("dq").value.trim();
+  const cat=document.getElementById("dcat").value;
+  const out=document.getElementById("docout"), st=document.getElementById("docstats");
+  if (!(await docsInit())) return;
+  const words=norm(qraw).split(/\s+/).filter(w=>w.length>=2);
+  if (!words.length){ out.innerHTML=""; return; }
+  // υποψήφια έγγραφα: τομή των bitmaps των prefixes (λέξεις <4 χαρ. δεν φιλτράρουν)
+  let cand=DOCS.manifest.docs.map((d,i)=>i);          // θέσεις στο manifest (= bit positions)
+  for (const w of words){
+    if (w.length<4) continue;
+    const b=DOCS.terms[w.slice(0,6)];
+    if (!b){ cand=[]; break; }
+    cand=cand.filter(i=>bitsHas(b,i));
+  }
+  if (cat) cand=cand.filter(i=>DOCS.manifest.docs[i].cat===cat);
+  if (!cand.length){ out.innerHTML=`<div class="empty">Κανένα έγγραφο δεν περιέχει όλες τις λέξεις.</div>`; st.textContent="0 έγγραφα"; return; }
+  st.textContent=`Έλεγχος ${cand.length} υποψήφιων εγγράφων…`;
+  out.innerHTML="";
+  const hits=[];
+  // φόρτωση σε παρτίδες των 6
+  for (let i=0;i<cand.length;i+=6){
+    await Promise.all(cand.slice(i,i+6).map(async pi=>{
+      const id=DOCS.manifest.docs[pi].id;
+      if (!DOCS.cache[id]) { try{ DOCS.cache[id]=await fetch(`${DOCS.base}${id}.json`).then(r=>r.json()); }catch(e){ return; } }
+      const d=DOCS.cache[id]; const pages=[];
+      for (const [pg,txt] of d.p){
+        const nt=norm(txt);
+        if (words.every(w=>nt.includes(w))){
+          const pos=nt.indexOf(words[0]); const s=Math.max(0,pos-160), e=Math.min(txt.length,pos+260);
+          pages.push({pg, snip:(s>0?"… ":"")+highlight(txt.slice(s,e).replace(/\s+/g," "),words)+(e<txt.length?" …":"")});
+        }
+      }
+      if (pages.length) hits.push({id:pi, pages});
+    }));
+    st.textContent=`${hits.length} έγγραφα με αποτελέσματα (ελέγχθηκαν ${Math.min(i+6,cand.length)}/${cand.length})`;
+  }
+  hits.sort((a,b)=>b.pages.length-a.pages.length);
+  out.innerHTML=hits.map(h=>{
+    const m=DOCS.manifest.docs[h.id];
+    const link=m.fek?`<a class="prov-link" href="${esc(m.fek)}" target="_blank" rel="noopener">PDF (ΕΤ)</a>`:"";
+    return `<div class="card" style="cursor:default">
+      <h3>${esc(m.t)}</h3>
+      <div class="meta"><span class="pill">${esc(m.cat)}</span> ${esc(m.ty)} · ${m.n} σελ. · ${h.pages.length} σελ. με αποτέλεσμα · ${link}
+        <span style="color:var(--muted);font-size:11px;word-break:break-all">${esc(m.f)}</span></div>
+      ${h.pages.slice(0,6).map(p=>`<div class="snip" style="margin:6px 0;padding-left:10px;border-left:2px solid var(--line)"><b style="color:var(--accent);font-family:var(--mono);font-size:12px">σελ. ${p.pg}</b> ${p.snip}</div>`).join("")}
+      ${h.pages.length>6?`<div class="side-more">+ ${h.pages.length-6} σελίδες ακόμα</div>`:""}
+    </div>`;
+  }).join("")||`<div class="empty">Κανένα αποτέλεσμα.</div>`;
+  st.textContent=`${hits.length} έγγραφα · ${hits.reduce((s,h)=>s+h.pages.length,0)} σελίδες`;
+}
+document.getElementById("dq").addEventListener("keydown", e=>{ if(e.key==="Enter") docSearch(); });
+document.getElementById("dcat").addEventListener("change", docSearch);
+document.querySelector('nav button[data-tab=docs]').addEventListener("click", docsInit);
 
 /* UPDATES (domiki.gr calendar watch) */
 const U = window.DOMIKI_UPDATES || {generated:"—", items:[]};
