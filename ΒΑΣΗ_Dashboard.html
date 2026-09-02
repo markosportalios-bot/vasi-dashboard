@@ -233,7 +233,7 @@ nav button{white-space:nowrap;flex:0 0 auto}
 
 <section class="tab" id="tab-docs">
   <div class="row">
-    <input type="text" id="dq" placeholder="Αναζήτηση σε ΦΕΚ, εγκυκλίους, Κτιριοδομικό, ΝΟΚ (win2), τεχνικές σημειώσεις… (Enter)">
+    <input type="text" id="dq" placeholder="Αναζήτηση σε ΦΕΚ, εγκυκλίους, Κτιριοδομικό, ΝΟΚ, τεχνικές σημειώσεις… (Enter)">
     <select id="dcat" class="narrow"><option value="">Όλες οι κατηγορίες</option></select>
   </div>
   <div class="stats" id="docstats">Πληκτρολόγησε 2+ λέξεις-κλειδιά και πάτα Enter. Η αναζήτηση φορτώνει μόνο τα έγγραφα που περιέχουν τις λέξεις.</div>
@@ -264,8 +264,8 @@ nav button{white-space:nowrap;flex:0 0 auto}
   </div>
   <div class="stats" id="updstats"></div>
   <div id="updout"></div>
-  <div class="notice">Πηγή: ημερολόγιο core.domiki.gr (εβδομαδιαίος αυτόματος έλεγχος) · PDF ΦΕΚ από το Εθνικό Τυπογραφείο.
-    Οι «Αλλαγές κωδικοποίησης» είναι άρθρα παλαιότερων νόμων που το domiki επισημαίνει ως τροποποιημένα — έλεγξε πάντα το ΦΕΚ.</div>
+  <div class="notice">Εβδομαδιαίος αυτόματος έλεγχος νέων ΦΕΚ/εγκυκλίων · PDF ΦΕΚ από το Εθνικό Τυπογραφείο.
+    Οι «Αλλαγές κωδικοποίησης» είναι άρθρα παλαιότερων νόμων που επισημαίνονται ως τροποποιημένα — έλεγξε πάντα το ΦΕΚ.</div>
 </section>
 
 </main>
@@ -518,7 +518,7 @@ function renderArt(n){
     <div id="histview"></div>`;
 }
 
-/* ===== ΤΡΟΠΟΠΟΙΗΣΕΙΣ ΚΩΔΙΚΑ (amendments.json → D.amendments) + ΙΣΤΟΡΙΚΟ ΝΟΚ (win2) ===== */
+/* ===== ΤΡΟΠΟΠΟΙΗΣΕΙΣ ΚΩΔΙΚΑ (amendments.json → D.amendments) + ΙΣΤΟΡΙΚΟ ΝΟΚ ===== */
 const AM = (D.amendments||[]);
 const amendsFor = n => AM.filter(x => String(x.target)===String(n) && !["manual","par_not_found","words_not_found","no_article","exists","no_text"].includes(x.status));
 const amendsPending = n => AM.filter(x => String(x.target)===String(n) && ["manual","par_not_found","words_not_found"].includes(x.status));
@@ -593,7 +593,7 @@ function showAmendDiff(n, idx){
     <div class="hist-law" style="background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px">${x.target_par?wordDiff(old,nw):paraDiff(old,nw)}</div>`;
 }
 
-/* Ιστορικό ΝΟΚ (win2) — lazy: history/<ΚΧΠ>.json */
+/* Ιστορικό ΝΟΚ — lazy: history/<ΚΧΠ>.json */
 const HIST = { index:null, cache:{} };
 async function histIndex(){
   if (HIST.index) return HIST.index;
@@ -611,7 +611,7 @@ async function renderHistCard(n){
       <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">Τροποποιητικοί νόμοι ΝΟΚ:</div>
       <div>${h.laws.map(l=>`<span class="lawchip">${esc(l)}</span>`).join("")||"—"}</div>
       <div style="margin-top:8px"><a class="prov-link" onclick="showNokHistory(${n})">Ιστορικό & σύγκριση ΝΟΚ → ΚΧΠ</a></div>
-      ${h.changed?`<div style="font-size:11.5px;color:var(--muted);margin-top:4px">Υπάρχουν διαφορές μεταξύ εκδόσεων win2</div>`:""}</div>`;
+      ${h.changed?`<div style="font-size:11.5px;color:var(--muted);margin-top:4px">Υπάρχουν διαφορές μεταξύ εκδόσεων κωδικοποίησης</div>`:""}</div>`;
   if (html) sb.insertAdjacentHTML("afterbegin", html);
 }
 function stripKxpBody(b){
@@ -626,29 +626,29 @@ async function showNokHistory(n){
   const blocks=h.nok.map((nk,ni)=>{
     const vs=nk.versions; const last=vs[vs.length-1];
     const tabs=[`<button class="active" onclick="histTab(this,'h${ni}-cmp')">ΝΟΚ ${esc(nk.art)} → ΚΧΠ ${n}</button>`]
-      .concat(vs.map((v,vi)=>`<button onclick="histTab(this,'h${ni}-v${vi}')">win2 ${esc(v.ver)}${v.changed_from_prev?" ●":""}</button>`))
+      .concat(vs.map((v,vi)=>`<button onclick="histTab(this,'h${ni}-v${vi}')">έκδ. ${esc(v.ver)}${v.changed_from_prev?" ●":""}</button>`))
       .concat([`<button onclick="histTab(this,'h${ni}-notes')">Σημειώσεις/εγκύκλιοι (${last.notes.length})</button>`]);
-    const cmp=`<div id="h${ni}-cmp" class="histpane"><div class="legend"><del class="d">ΝΟΚ αρ.${esc(nk.art)} (win2 ${esc(last.ver)}, έως ${esc(last.latest_law)})</del> → <ins class="d">ΚΧΠ ${n}</ins> — τι άλλαξε η κωδικοποίηση (word-diff)</div>
+    const cmp=`<div id="h${ni}-cmp" class="histpane"><div class="legend"><del class="d">ΝΟΚ αρ.${esc(nk.art)} (κωδικοποίηση έκδ. ${esc(last.ver)}, έως ${esc(last.latest_law)})</del> → <ins class="d">ΚΧΠ ${n}</ins> — τι άλλαξε η κωδικοποίηση (word-diff)</div>
       <div class="hist-law">${paraDiff(last.text, stripKxpBody(kxp.b))}</div></div>`;
     const vers=vs.map((v,vi)=>{
       const prev=vi>0?vs[vi-1]:null;
       const tags=Object.entries(v.par_tags||{}).map(([p,ls])=>`<span class="partag">§${esc(p)}: ${esc(ls.join(", "))}</span>`).join(" ");
-      const body= prev&&v.changed_from_prev ? `<div class="legend">Διαφορές από win2 ${esc(prev.ver)} → ${esc(v.ver)}</div><div class="hist-law">${paraDiff(prev.text,v.text)}</div>`
+      const body= prev&&v.changed_from_prev ? `<div class="legend">Διαφορές από έκδ. ${esc(prev.ver)} → ${esc(v.ver)}</div><div class="hist-law">${paraDiff(prev.text,v.text)}</div>`
                  : `<div class="hist-law">${esc(v.text)}</div>`;
       return `<div id="h${ni}-v${vi}" class="histpane" hidden>
-        <div style="font-size:12.5px;color:var(--muted)">Έκδοση win2 ${esc(v.ver)} · έως ${esc(v.latest_law)} · τροποποιητικοί: ${(v.laws||[]).map(l=>`<span class="lawchip">${esc(l)}</span>`).join("")}</div>
+        <div style="font-size:12.5px;color:var(--muted)">Έκδοση κωδικοποίησης ${esc(v.ver)} · έως ${esc(v.latest_law)} · τροποποιητικοί: ${(v.laws||[]).map(l=>`<span class="lawchip">${esc(l)}</span>`).join("")}</div>
         <div style="margin:6px 0">${tags}</div>
         ${(v.notes||[]).filter(t=>/^Ισχύς/.test(t)).map(t=>`<div class="hist-note">${esc(t)}</div>`).join("")}
         ${body}</div>`;
     }).join("");
     const notes=`<div id="h${ni}-notes" class="histpane" hidden>
         ${(last.notes||[]).map(t=>`<div class="hist-note">${esc(t)}</div>`).join("")||"<div class='empty'>—</div>"}
-        ${(last.comm||[]).length?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted);margin-top:8px">Σχόλια/ερμηνείες win2 (${last.comm.length})</summary>${last.comm.map(t=>`<div class="hist-comm">${esc(t)}</div>`).join("")}</details>`:""}
+        ${(last.comm||[]).length?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted);margin-top:8px">Σχόλια/ερμηνείες κωδικοποίησης (${last.comm.length})</summary>${last.comm.map(t=>`<div class="hist-comm">${esc(t)}</div>`).join("")}</details>`:""}
         ${(last.expl||[]).length?`<details><summary style="cursor:pointer;font-size:12.5px;color:var(--muted);margin-top:8px">Αιτιολογική έκθεση ΝΟΚ</summary>${last.expl.map(t=>`<div class="hist-comm">${esc(t)}</div>`).join("")}</details>`:""}</div>`;
     return `<div class="sidecard" style="margin-top:14px"><h4>Ιστορικό: ΝΟΚ (ν.4067/2012) άρθρο ${esc(nk.art)} — ${esc(nk.title)}</h4>
       <div class="hist-tabs">${tabs.join("")}</div>${cmp}${vers}${notes}</div>`;
   });
-  el.innerHTML=blocks.join("")+`<div class="notice">Πηγή ιστορικού: κωδικοποιήσεις ΝΟΚ win2.gr (μεταφορά αυτούσια, χωρίς επεξεργασία). Οι σημάνσεις §: Ν.xxxx/yy δείχνουν τον νόμο που τροποποίησε τελευταία κάθε παράγραφο. Το ισχύον δίκαιο είναι ο Κώδικας.</div>`;
+  el.innerHTML=blocks.join("")+`<div class="notice">Ιστορικό ΝΟΚ (ν.4067/2012) πριν την κωδικοποίηση στον Κώδικα. Οι σημάνσεις §: Ν.xxxx/yy δείχνουν τον νόμο που τροποποίησε τελευταία κάθε παράγραφο. Το ισχύον δίκαιο είναι ο Κώδικας.</div>`;
   el.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function histTab(btn,id){
@@ -827,7 +827,7 @@ document.getElementById("dq").addEventListener("keydown", e=>{ if(e.key==="Enter
 document.getElementById("dcat").addEventListener("change", docSearch);
 document.querySelector('nav button[data-tab=docs]').addEventListener("click", docsInit);
 
-/* UPDATES (domiki.gr calendar watch) */
+/* UPDATES (εβδομαδιαίος έλεγχος ΦΕΚ) */
 const U = window.DOMIKI_UPDATES || {generated:"—", items:[]};
 const SRC_LABEL = {new:"Νέο", enforce:"Έναρξη ισχύος", changes:"Αλλαγή κωδικοποίησης"};
 U.items.forEach(x => { x.nt = norm(x.title); });
@@ -872,7 +872,7 @@ function renderUpdates(){
     ].filter(Boolean).join(" ");
     let title=h.title.replace(/\s*ΦΕΚ-\S+\s*$/,"").replace(/\s+Αρθ-.*$/,"").replace(/\s+ΑΡΘΡΟΝ-.*$/,"").replace(/\s*-\s*ΠΕΡΙΕΧΟΜΕΝΑ\s*$/,"");
     if (h.ref) title=title.replace(new RegExp("^"+(h.kind+"-"+h.ref).replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&")+"\\s*","i"),"");
-    if (h.source==="changes") title=`Τροποποιημένα άρθρα στην κωδικοποίηση domiki (${g.items.length})`;
+    if (h.source==="changes") title=`Τροποποιημένα άρθρα στην κωδικοποίηση (${g.items.length})`;
     else if (!title && g.items.length>1) title=`Νόμος — ${g.items.length} ομάδες άρθρων (βλ. παρακάτω)`;
     const arts=g.items.filter(i=>/Αρθ-|ΑΡΘΡΟΝ-|Μέρος|Παράρτημα/.test(i.title)).map(i=>{
       let t=i.title.replace(/^\S+\s+/,"").replace(/\s*ΦΕΚ-\S+\s*$/,"");
